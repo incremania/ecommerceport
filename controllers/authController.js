@@ -1,12 +1,9 @@
 const User = require('../models/UserModel');
+const { handleError } = require('../errors/handleErr')
+const { sendCookies } = require('../utils/token')
+const { checkPermissionUser } = require('../middleware/checkPermission')
 
-const handleError = (error) => {
-    try {
-        
-    } catch (err) {
-        console.log(err)
-    }
-}
+
 
 // registration controller
 module.exports.register = async( req, res ) => {
@@ -18,11 +15,13 @@ module.exports.register = async( req, res ) => {
         const user = await User.create(req.body)
         const userWithoutPassword = user.toObject();
         delete userWithoutPassword.password
+        sendCookies(res, user)
+      
         res.status(201).json({ user: userWithoutPassword })
     } catch (err) {
-        const error = handleError(err)
         console.log(err)
-        res.status(400).json({ err })
+        const error = handleError(err)
+        res.status(400).json({ error })
     }
 }
 
@@ -45,9 +44,43 @@ module.exports.login = async( req, res ) => {
 
         const userWithoutPassword = user.toObject();
         delete userWithoutPassword.password
+        sendCookies(res, user)
         res.status(200).json({ user: userWithoutPassword })
     } catch (error) {
         console.log(error)
         res.status(500).json({error})
     }
 }
+
+// update user information
+module.exports.update = async( req, res ) => {
+    try {
+        const { firstname, lastname, email} = req.body;
+        const user = await User.findById(req.user.userId)
+        checkPermissionUser(req.user.userId, user._id)
+        user.firstname = firstname
+        user.lastname = lastname
+        user.email = email
+        await user.save()
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password
+
+        res.status(200).json({ user: userWithoutPassword })
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ error })
+    }
+}
+
+module.exports.delete = async( req, res ) => {
+    try {
+        await User.findByIdAndDelete(req.user.userId)
+        res.status(200).json({ msg: "user deleted"})
+       
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ error })
+    }
+}
+
+
