@@ -27,7 +27,7 @@ const UserSchema = new Schema({
         type: String,
         required: [true, 'email is required'],
         unique: true,
-        validates: [isEmail, 'please enter a valid email address']
+        validate: [isEmail, 'please enter a valid email address']
     },
     password: {
         type: String,
@@ -39,10 +39,10 @@ const UserSchema = new Schema({
 )
 
 UserSchema.pre('save', async function() {
-    if(!UserSchema.isModified('password')) return;
+    if(!this.isModified('password')) return;
     
     const salt = await bcrypt.genSalt();
-    this.password = bcrypt.hash(this.password, salt)
+    this.password = await bcrypt.hash(this.password, salt)
 })
 
 UserSchema.methods.comparePassword = async function(password) {
