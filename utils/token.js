@@ -8,17 +8,23 @@ const createToken = (id) => {
  }
 
 const authenticateUser = async (req, res, next ) => {
-    const token = req.signedCookies.jwt;
-    if(!token) {
-        res.status(404).json({ error: 'token not found'})
+    try {
+        const token = req.signedCookies.jwt;
+        if(!token) {
+           return res.status(404).json({ error: 'token not found'})
+        }
+        const payload =  jwt.verify(token, process.env.JWT_SECRET)
+        console.log(payload)
+        if(!payload) {
+           return res.status(401).json({ error: 'invalid token'})
+        }    
+        const user = await User.findById(payload.id)
+        req.user = { userId: payload.id , role: user.role}
+        next()  
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: 'internal server error'})
     }
-    const payload = jwt.verify(token, process.env.JWT_SECRET)
-    if(!payload) {
-        res.status(404).json({ error: 'invalid token'})
-    }
-    const user = await User.findById(payload.id)
-    req.user = { userId: payload.id , role: user.role}
-    next()
 }
 
 const sendCookies = (res, user ) => {
@@ -29,8 +35,6 @@ const sendCookies = (res, user ) => {
         signed: true
       })
 }
-
-
 
 
  module.exports = {

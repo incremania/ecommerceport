@@ -8,5 +8,5 @@ router
 .post('/login', authController.login)
 .patch('/update', authenticateUser, authController.update)
 .delete('/delete', authenticateUser, authController.delete)
-
+.post('/logout', authController.logout)
 module.exports = router

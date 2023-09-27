@@ -83,4 +83,14 @@ module.exports.delete = async( req, res ) => {
     }
 }
 
-
+module.exports.logout = async (req, res ) => {
+    try {
+        res.cookie('jwt', process.env.JWT_SECRET, {
+            maxAge: 2
+        })
+        res.status(200).json({ msg: "logged out"})
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message})
+    }
+}
