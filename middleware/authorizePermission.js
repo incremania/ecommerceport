@@ -1,9 +1,13 @@
 const authorizePermission = (...role) => {
-    return ( req, res, next ) => {
-        if(!req.user.role.includes(role)) {
-            res.status(401).json({err: "unathorized request"})
+    try {
+        return ( req, res, next ) => {
+            if(!req.user.role.includes(role)) {
+                return res.status(401).json({err: "unathorized request"})
+            }
+            next()
         }
-        next()
+    } catch (error) {
+       console.log(error) 
     }
 }
 

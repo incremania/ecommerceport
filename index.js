@@ -26,11 +26,14 @@ app.use(cookieParser(process.env.JWT_SECRET))
 app.use(express.json())
 
 // required routes here
+const authRoute = require('./routes/authRoute')
 const userRoute = require('./routes/userRoute');
-
+const productRoute = require('./routes/productRoute')
 
 // routes 
+app.use('/', authRoute)
 app.use('/', userRoute);
+app.use('/product', productRoute)
 
 // middleware
 app.use(appNotFound)
